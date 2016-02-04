@@ -5,7 +5,6 @@ from cachefs import __version__
 setup (name = 'cachefs',
         version = __version__,
         install_requires = [
-            'six',
             'pyat',
         ],
 	packages = [
