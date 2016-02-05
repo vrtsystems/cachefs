@@ -111,3 +111,85 @@ class TestNode(TempDirTestCase):
             assert not node.is_dir, 'Apparently a directory'
             assert not node.is_file, 'Apparently a file'
             assert node.is_link, 'Apparently not a link'
+
+    def test_symlink_target(self):
+        if not self.HAS_LINKS:
+            raise SkipTest
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        assert cache[self.temp_dir.link_to_subdir].target == 'subdir'
+        assert cache[self.temp_dir.link_top].target == self.temp_dir.tempdir
+        assert cache[self.temp_dir.link_a].target == '../a'
+        assert cache[self.temp_dir.link_to_a].target == 'subdir/a'
+        assert cache[self.temp_dir.link_broken].target == 'nowhere'
+
+    def test_symlink_abs_target(self):
+        if not self.HAS_LINKS:
+            raise SkipTest
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        assert cache[self.temp_dir.link_to_subdir].abs_target \
+                == os.path.join(self.temp_dir.tempdir, 'subdir')
+        assert cache[self.temp_dir.link_top].abs_target == self.temp_dir.tempdir
+        assert cache[self.temp_dir.link_a].abs_target \
+                == os.path.join(self.temp_dir.tempdir, 'a')
+        assert cache[self.temp_dir.link_to_a].abs_target \
+                == os.path.join(self.temp_dir.tempdir, 'subdir', 'a')
+        assert cache[self.temp_dir.link_broken].abs_target \
+                == os.path.join(self.temp_dir.tempdir, 'nowhere')
+
+    def test_symlink_abs_final_target(self):
+        if not self.HAS_LINKS:
+            raise SkipTest
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        assert cache[self.temp_dir.link_to_subdir].abs_final_target \
+                == os.path.join(self.temp_dir.tempdir, 'subdir')
+        assert cache[self.temp_dir.link_top].abs_final_target \
+                == self.temp_dir.tempdir
+        assert cache[self.temp_dir.link_a].abs_final_target \
+                == os.path.join(self.temp_dir.tempdir, 'a')
+        assert cache[self.temp_dir.link_to_a].abs_final_target \
+                == os.path.join(self.temp_dir.tempdir, 'a')
+        assert cache[self.temp_dir.link_broken].abs_final_target \
+                == os.path.join(self.temp_dir.tempdir, 'nowhere')
+
+    def test_symlink_target_node(self):
+        if not self.HAS_LINKS:
+            raise SkipTest
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        assert cache[self.temp_dir.link_to_subdir].target_node \
+                is cache[self.temp_dir.dir_subdir]
+        assert cache[self.temp_dir.link_top].target_node \
+                is cache[self.temp_dir.tempdir]
+        assert cache[self.temp_dir.link_a].target_node \
+                is cache[self.temp_dir.file_a]
+        assert cache[self.temp_dir.link_to_a].target_node \
+                is cache[self.temp_dir.link_a]
+        # This should raise a KeyError
+        try:
+            cache[self.temp_dir.link_broken].target_node
+            assert False, 'Target apparently exists'
+        except KeyError:
+            pass
+
+    def test_symlink_final_target_node(self):
+        if not self.HAS_LINKS:
+            raise SkipTest
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        assert cache[self.temp_dir.link_to_subdir].final_target_node \
+                is cache[self.temp_dir.dir_subdir]
+        assert cache[self.temp_dir.link_top].final_target_node \
+                is cache[self.temp_dir.tempdir]
+        assert cache[self.temp_dir.link_a].final_target_node \
+                is cache[self.temp_dir.file_a]
+        assert cache[self.temp_dir.link_to_a].final_target_node \
+                is cache[self.temp_dir.file_a]
+        # This should raise a KeyError
+        try:
+            cache[self.temp_dir.link_broken].final_target_node
+            assert False, 'Target apparently exists'
+        except KeyError:
+            pass
