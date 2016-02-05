@@ -115,10 +115,13 @@ class Node(collections.Mapping):
         return stat.S_IFMT(self.stat.st_mode)
 
     @property
-    def is_socket(self):
+    def is_socket(self):  # pragma: no cover
         '''
         Return true if the file is a socket.
         '''
+        # Not covered by tests: Not all systems implement sockets in the
+        # filesystem and there isn't always permission to create them.
+        # Implementation is "simple enough" that bugs are unlikely.
         return self.file_type == stat.S_IFSOCK
 
     @property
@@ -143,17 +146,33 @@ class Node(collections.Mapping):
         return self.file_type == stat.S_IFDIR
 
     @property
-    def is_char(self):
+    def is_block(self):  # pragma: no cover
+        '''
+        Return true if the file is a block device.
+        '''
+        # Not covered by tests: Not all systems implement character devices in
+        # the filesystem and there isn't always permission to create them.
+        # Implementation is "simple enough" that bugs are unlikely.
+        return self.file_type == stat.S_IFBLK
+
+    @property
+    def is_char(self):  # pragma: no cover
         '''
         Return true if the file is a character device.
         '''
+        # Not covered by tests: Not all systems implement character devices in
+        # the filesystem and there isn't always permission to create them.
+        # Implementation is "simple enough" that bugs are unlikely.
         return self.file_type == stat.S_IFCHR
 
     @property
-    def is_fifo(self):
+    def is_fifo(self):  # pragma: no cover
         '''
         Return true if the file is a FIFO.
         '''
+        # Not covered by tests: Not all systems implement FIFOs in
+        # the filesystem and there isn't always permission to create them.
+        # Implementation is "simple enough" that bugs are unlikely.
         return self.file_type == stat.S_IFIFO
 
     # Handling of links.
