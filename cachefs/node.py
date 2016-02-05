@@ -99,6 +99,12 @@ class Node(collections.Mapping):
         '''
         return os.path.join(self.abs_path, *elements)
 
+    def join_node(self, *elements):
+        '''
+        Return the node referenced by joining the *elements.
+        '''
+        return self._cache()[self.join(*elements)]
+
     @property
     def parent(self):
         '''

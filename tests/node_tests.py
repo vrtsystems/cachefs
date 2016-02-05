@@ -91,6 +91,14 @@ class TestNode(TempDirTestCase):
                 os.path.join(self.temp_dir.tempdir, 'abcd', 'efgh'), \
                 'Path does not match'
 
+    def test_node_join_node(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+
+        # Get a reference to one of the files.
+        node_dir = cache[self.temp_dir.tempdir]
+        node_a = cache[self.temp_dir.file_a]
+        assert node_dir.join_node(node_a.base_name) is node_a
+
     def test_node_type(self):
         cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
 
