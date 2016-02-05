@@ -64,8 +64,10 @@ class CacheFs(object):
         '''
         Purge the cache of old entries.
         '''
-        for n in filter(lambda n : n.atime_since > self._cache_expiry,
-                self._nodes.values()):
+        all_nodes = list(self._nodes.values())
+        expired = list(filter(lambda n : n.atime_since > self._cache_expiry,
+            all_nodes))
+        for n in expired:
             try:
                 del self._nodes[n.abs_path]
             except KeyError:  # pragma: no cover
