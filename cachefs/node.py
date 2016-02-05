@@ -221,43 +221,6 @@ class Node(collections.Mapping):
 
     # Searching for child nodes.
 
-    def _walk(self, topdown, followlinks, visited):
-        if not self.is_dir:
-            _raise_oserror(errno.ENOTDIR, self.abs_path)
-
-        files = []
-        directories = []
-        dir_nodes = []
-
-        for node in self.values():
-            orig_node = node
-            if node.is_link:
-                node = node.final_target_node
-                follow = followlinks and (node.abs_path not in visited)
-                visited.add(orig_node.abs_path)
-            else:
-                follow = True
-
-            if node.is_dir:
-                if follow:
-                    dir_nodes.append(node)
-                directories.append(orig_node.base_name)
-            else:
-                files.append(node.base_name)
-
-        if topdown:
-            yield (self.abs_path, directories, files)
-
-        visited.add(self.abs_path)
-        for subdir in dir_nodes:
-            if subdir.abs_path in visited:
-                continue
-            for res in subdir._walk(topdown, followlinks, visited):
-                yield res
-
-        if not topdown:
-            yield (self.abs_path, directories, files)
-
     def _find(self, predicate, depth_predicate, depth, depth_first):
         if self.is_link:
             for found in self.final_target_node._find(
