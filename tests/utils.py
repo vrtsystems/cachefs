@@ -20,6 +20,7 @@ class SimpleTempdir(object):
         - 'to_subdir' (top-level, pointing to 'subdir')
         - 'top' (in 'subdir', pointing to absolute path of top-level)
         - 'a' (inside 'subdir', pointing to '../a')
+        - 'to_a' (top-level, pointing to 'subdir/a')
         - 'broken' (top-level, pointing to 'nowhere')
     '''
     def __init__(self):
@@ -35,6 +36,7 @@ class SimpleTempdir(object):
         if hasattr(os, 'symlink'):
             self.link_to_subdir = None
             self.link_a = None
+            self.link_to_a = None
             self.link_top = None
             self.link_broken = None
 
@@ -61,19 +63,21 @@ class SimpleTempdir(object):
         if hasattr(os, 'symlink'):
             self.link_to_subdir = os.path.join(self.tempdir, 'to_subdir')
             self.link_a = os.path.join(self.dir_subdir, 'a')
+            self.link_to_a = os.path.join(self.tempdir, 'to_a')
             self.link_top = os.path.join(self.dir_subdir, 'top')
-            self.link_broken = os.path.join(self.tempdir, 'nowhere')
+            self.link_broken = os.path.join(self.tempdir, 'broken')
             self.all_files.update(set([
-                self.link_to_subdir, self.link_a, self.link_top,
-                self.link_broken
+                self.link_to_subdir, self.link_a, self.link_to_a,
+                self.link_top, self.link_broken
             ]))
 
             os.symlink('subdir', self.link_to_subdir)
             os.symlink(self.tempdir, self.link_top)
             os.symlink('../a', self.link_a)
+            os.symlink('subdir/a', self.link_to_a)
             os.symlink('nowhere', self.link_broken)
             self.to_unlink.extend([self.link_to_subdir, self.link_a,
-                    self.link_top, self.link_broken])
+                    self.link_to_a, self.link_top, self.link_broken])
 
     def delete(self):
         for name in self.to_unlink:
