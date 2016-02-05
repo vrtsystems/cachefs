@@ -229,3 +229,71 @@ class TestNode(TempDirTestCase):
         node = cache[self.temp_dir.tempdir]
         num_children = len(node)
         assert num_children == expected
+
+    def test_node_find_all_breadth_first(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        nodes = list(cache[self.temp_dir.tempdir].find(depth_first=False))
+        file_names = [n.abs_path for n in nodes]
+
+        # Check all files are present
+        assert set(file_names) == self.temp_dir.all_files
+
+        # Check the depths of each file
+        base = len(self.temp_dir.tempdir.split(os.path.sep))
+        depths = [len(name.split(os.path.sep)) for name in file_names]
+        if self.HAS_LINKS:
+            # Expected order:
+            depths_expected = [
+                    base,       # top-level directory
+                    base + 1,   # .../subdir
+                    base + 1,   # .../a
+                    base + 1,   # .../to_a
+                    base + 1,   # .../to_subdir
+                    base + 1,   # .../broken
+                    base + 2,   # .../subdir/a
+                    base + 2,   # .../subdir/b
+                    base + 2,   # .../subdir/top
+            ]
+        else:
+            # Expected order:
+            depths_expected = [
+                    base,       # top-level directory
+                    base + 1,   # .../a
+                    base + 1,   # .../subdir
+                    base + 2,   # .../subdir/b
+            ]
+        assert depths == depths_expected
+
+    def test_node_find_all_depth_first(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        nodes = list(cache[self.temp_dir.tempdir].find(depth_first=True))
+        file_names = [n.abs_path for n in nodes]
+
+        # Check all files are present
+        assert set(file_names) == self.temp_dir.all_files
+
+        # Check the depths of each file
+        base = len(self.temp_dir.tempdir.split(os.path.sep))
+        depths = [len(name.split(os.path.sep)) for name in file_names]
+        if self.HAS_LINKS:
+            # Expected order:
+            depths_expected = [
+                    base + 2,   # .../subdir/a
+                    base + 2,   # .../subdir/b
+                    base + 2,   # .../subdir/top
+                    base + 1,   # .../subdir
+                    base + 1,   # .../a
+                    base + 1,   # .../to_a
+                    base + 1,   # .../to_subdir
+                    base + 1,   # .../broken
+                    base,       # top-level directory
+            ]
+        else:
+            # Expected order:
+            depths_expected = [
+                    base + 2,   # .../subdir/b
+                    base + 1,   # .../a
+                    base + 1,   # .../subdir
+                    base,       # top-level directory
+            ]
+        assert depths == depths_expected
