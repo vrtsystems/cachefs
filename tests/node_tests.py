@@ -201,3 +201,31 @@ class TestNode(TempDirTestCase):
             assert False, 'Target apparently exists'
         except KeyError:
             pass
+
+    def test_node_getitem(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node_dir = cache[self.temp_dir.tempdir]
+        node_file = cache[self.temp_dir.file_a]
+        child = node_dir[node_file.base_name]
+        assert node_file is child
+
+    def test_node_iter(self):
+        expected = set(['a', 'subdir'])
+        if self.HAS_LINKS:
+            expected.update(set(['to_subdir', 'to_a', 'broken']))
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node = cache[self.temp_dir.tempdir]
+        children = set(node)
+        assert children == expected
+
+    def test_node_iter(self):
+        if self.HAS_LINKS:
+            expected = 5
+        else:
+            expected = 2
+
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node = cache[self.temp_dir.tempdir]
+        num_children = len(node)
+        assert num_children == expected
