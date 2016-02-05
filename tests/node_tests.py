@@ -88,3 +88,25 @@ class TestNode(TempDirTestCase):
         assert node.join('abcd', 'efgh') == \
                 os.path.join(self.temp_dir.tempdir, 'abcd', 'efgh'), \
                 'Path does not match'
+
+    def test_node_type(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        has_links = getattr(os, 'symlink')
+
+        node = cache[self.temp_dir.tempdir]
+        assert node.is_dir, 'Apparently not a directory'
+        assert not node.is_file, 'Apparently a file'
+        if has_links:
+            assert not node.is_link, 'Apparently a link'
+
+        node = cache[self.temp_dir.file_a]
+        assert not node.is_dir, 'Apparently a directory'
+        assert node.is_file, 'Apparently not a file'
+        if has_links:
+            assert not node.is_link, 'Apparently a link'
+
+        if has_links:
+            node = cache[self.temp_dir.link_a]
+            assert not node.is_dir, 'Apparently a directory'
+            assert not node.is_file, 'Apparently a file'
+            assert node.is_link, 'Apparently not a link'
