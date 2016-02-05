@@ -322,6 +322,3 @@ class Node(collections.Mapping):
             predicate = lambda n : True
         for found in self._find(predicate, depth_predicate, 0, depth_first):
             yield found
-
-def _raise_oserror(err, path):
-    raise OSError(err, os.strerror(err), path)
