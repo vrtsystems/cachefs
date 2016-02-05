@@ -63,3 +63,28 @@ class TestNode(TempDirTestCase):
 
         assert found_names == set([self.temp_dir.file_a]), \
                 'Mismatch in expected list'
+
+    def test_node_base_name(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+
+        # Get a reference to one of the files.
+        node = cache[self.temp_dir.file_a]
+        assert node.base_name == os.path.basename(self.temp_dir.file_a), \
+                'Base name does not match'
+
+    def test_node_dir_name(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+
+        # Get a reference to one of the files.
+        node = cache[self.temp_dir.file_a]
+        assert node.dir_name == os.path.dirname(self.temp_dir.file_a), \
+                'Directory name does not match'
+
+    def test_node_join(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+
+        # Get a reference to one of the files.
+        node = cache[self.temp_dir.tempdir]
+        assert node.join('abcd', 'efgh') == \
+                os.path.join(self.temp_dir.tempdir, 'abcd', 'efgh'), \
+                'Path does not match'
