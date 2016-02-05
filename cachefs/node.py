@@ -100,6 +100,13 @@ class Node(collections.Mapping):
         return os.path.join(self.abs_path, *elements)
 
     @property
+    def parent(self):
+        '''
+        Return the parent node.
+        '''
+        return self._cache()[self.dir_name]
+
+    @property
     def stat(self):
         '''
         Return the result of os.stat() on this file.
