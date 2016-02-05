@@ -16,6 +16,8 @@ import time
 from .utils import TempDirTestCase, compare_walk
 
 class TestNode(TempDirTestCase):
+    HAS_LINKS = getattr(os, 'symlink')
+
     def test_stat_cache(self):
         cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
 
@@ -48,7 +50,7 @@ class TestNode(TempDirTestCase):
         assert found_names == self.temp_dir.all_files, 'A file was missed'
 
     def test_find_all_link(self):
-        if not hasattr(os, 'symlink'):
+        if not self.HAS_LINKS:
             raise SkipTest
         cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
         found_names = set([found.abs_path for found in
@@ -91,21 +93,20 @@ class TestNode(TempDirTestCase):
 
     def test_node_type(self):
         cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
-        has_links = getattr(os, 'symlink')
 
         node = cache[self.temp_dir.tempdir]
         assert node.is_dir, 'Apparently not a directory'
         assert not node.is_file, 'Apparently a file'
-        if has_links:
+        if self.HAS_LINKS:
             assert not node.is_link, 'Apparently a link'
 
         node = cache[self.temp_dir.file_a]
         assert not node.is_dir, 'Apparently a directory'
         assert node.is_file, 'Apparently not a file'
-        if has_links:
+        if self.HAS_LINKS:
             assert not node.is_link, 'Apparently a link'
 
-        if has_links:
+        if self.HAS_LINKS:
             node = cache[self.temp_dir.link_a]
             assert not node.is_dir, 'Apparently a directory'
             assert not node.is_file, 'Apparently a file'
