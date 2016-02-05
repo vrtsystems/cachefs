@@ -265,7 +265,7 @@ class Node(collections.Mapping):
             return
 
         child_depth = depth+1
-        show_self = depth_predicate(depth)
+        show_self = (depth == 0) and depth_predicate(depth)
         show_children = depth_predicate(child_depth)
         recurse = depth_predicate(depth, True)
 
@@ -274,24 +274,32 @@ class Node(collections.Mapping):
                 yield self
             return
 
-        # Apply predicate to self if not depth first
-        if (not depth_first) and show_self and predicate(self):
-            yield self
+        def _recurse():
+            if recurse:
+                for child in self.values():
+                    if not child.is_dir:
+                        continue
 
-        for child in self.values():
-            # Apply predicate to child if not a directory
-            if show_children and (not child.is_dir) and predicate(child):
-                yield child
+                    for found in child._find(predicate, depth_predicate,
+                            child_depth, depth_first):
+                        yield found
+        def _children():
+            if show_children:
+                for child in self.values():
+                    if predicate(child):
+                        yield child
+        def _self():
+            if show_self and predicate(self):
+                yield self
 
-            # Recurse into child if a directory
-            elif recurse and child.is_dir:
-                for found in child._find(predicate, depth_predicate,
-                        child_depth, depth_first):
-                    yield found
+        # Generators
+        generators = [_self(), _children(), _recurse()]
+        if depth_first:
+            generators.reverse()
 
-        # Apply predicate to self if depth first
-        if depth_first and show_self and predicate(self):
-            yield self
+        for g in generators:
+            for found in g:
+                yield found
 
     def find(self, predicate=None, depth=None, min_depth=None, max_depth=None,
             depth_first=False):
