@@ -196,7 +196,11 @@ class Node(collections.Mapping):
         '''
         Returns the absolute path for the target.
         '''
-        return os.path.abspath(self.join(self.target))
+        target = self.target
+        if not os.path.isabs(target):
+            target = self.parent.join(target)
+
+        return os.path.abspath(target)
 
     @property
     def abs_final_target(self):
