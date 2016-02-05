@@ -297,3 +297,35 @@ class TestNode(TempDirTestCase):
                     base,       # top-level directory
             ]
         assert depths == depths_expected
+
+    def test_node_find_specific_depth(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node = cache[self.temp_dir.tempdir]
+        file_names = set([n.abs_path for n in node.find(depth=1)])
+        # We should just see the children of the top-level directory.
+        assert file_names == set([c.abs_path for c in node.values()])
+
+    def test_node_find_min_depth(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node = cache[self.temp_dir.tempdir]
+        file_names = set([n.abs_path for n in node.find(min_depth=1)])
+        # We should just see everything except the top-level directory.
+        assert file_names == \
+                (self.temp_dir.all_files - set([self.temp_dir.tempdir]))
+
+    def test_node_find_max_depth(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node = cache[self.temp_dir.tempdir]
+        file_names = set([n.abs_path for n in node.find(max_depth=1)])
+        # We should see the top-level directory and its children
+        assert file_names == (set([self.temp_dir.tempdir]) | \
+                set([c.abs_path for c in node.values()]))
+
+    def test_node_find_depth_range(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        node = cache[self.temp_dir.tempdir]
+        file_names = set([n.abs_path for n in node.find(
+            min_depth=1, max_depth=2)])
+        # We should just see everything except the top-level directory.
+        assert file_names == \
+                (self.temp_dir.all_files - set([self.temp_dir.tempdir]))
