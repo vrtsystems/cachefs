@@ -31,6 +31,14 @@ class TestCacheFs(TempDirTestCase):
         assert cache[self.temp_dir.tempdir] is nr(), \
                 'Got back a new reference'
 
+    def test_does_not_exist(self):
+        cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0)
+        try:
+            cache[os.path.join(self.temp_dir.tempdir, 'nonexistant')]
+            assert False, 'We got a file that does not exist'
+        except KeyError:
+            pass
+
     def test_ref_purged_by_cache(self):
         scheduler = SynchronousTaskScheduler()
         cache = cachefs.CacheFs(cache_expiry=2.0, stat_expiry=1.0,
