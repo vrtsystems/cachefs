@@ -1,0 +1,12 @@
+Source: cachefs
+Maintainer: VRT Systems <support@vrt.com.au>
+Section: python
+Priority: optional
+Build-Depends: python-all (>= 2.7), debhelper (>= 9), dh-python, python-at
+Standards-Version: 3.9.1
+X-Python-Version: >= 2.7
+
+Package: python-cachefs
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python-at
+Description: Python filesystem cache library
