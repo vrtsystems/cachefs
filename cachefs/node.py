@@ -15,7 +15,7 @@ import weakref
 from .intnode import _Node
 
 
-class Node(collections.Mapping):
+class Node(collections.abc.Mapping):
     '''
     A file-system node object.  This represents a file or directory within
     the filesystem.  It has a weak reference to the parent node and holds the
